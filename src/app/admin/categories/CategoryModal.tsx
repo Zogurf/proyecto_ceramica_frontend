@@ -47,7 +47,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, categoryToEdit 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-opacity-50">
       <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg">
         <h2 className="mb-4 text-xl font-bold text-slate-900">
           {categoryToEdit ? "Editar Categoría" : "Nueva Categoría"}
