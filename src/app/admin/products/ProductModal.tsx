@@ -37,7 +37,10 @@ export default function ProductModal({
 }: ProductModalProps) {
   const [formData, setFormData] = useState<AdminProductRequest>(emptyProductForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+  
   useEffect(() => {
     if (productToEdit) {
       setFormData({
@@ -48,6 +51,11 @@ export default function ProductModal({
         status: productToEdit.status,
         categoryId: productToEdit.categoryId,
       });
+
+      setPreview(productToEdit.imageUrl || null);
+
+      setSelectedFile(null);
+
       return;
     }
 
@@ -55,6 +63,10 @@ export default function ProductModal({
       ...emptyProductForm,
       categoryId: categories[0]?.categoryId ?? 0,
     });
+
+    setPreview(null);
+
+    setSelectedFile(null);
   }, [productToEdit, categories, isOpen]);
 
   if (!isOpen) {
@@ -66,13 +78,59 @@ export default function ProductModal({
     setIsSubmitting(true);
 
     try {
-      await onSave(formData, productToEdit?.id);
+      let imageUrl = formData.imageUrl;
+
+      if (selectedFile) {
+        const uploadData = new FormData();
+
+        uploadData.append("file", selectedFile);
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadData,
+        });
+
+        const result = await response.json();
+
+        imageUrl = result.imageUrl;
+      }
+
+      await onSave(
+        {
+          ...formData,
+          imageUrl,
+        },
+        productToEdit?.id
+      );
       onClose();
     } catch (error: unknown) {
       alert("Error al guardar: " + getErrorMessage(error, "Error al guardar"));
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleImageChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    setSelectedFile(file);
+
+    setPreview(URL.createObjectURL(file));
+  };
+
+  const removeImage = () => {
+    setPreview(null);
+
+    setSelectedFile(null);
+
+    setFormData((prev) => ({
+      ...prev,
+      imageUrl: "",
+    }));
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -164,16 +222,40 @@ export default function ProductModal({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">URL de Imagen</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              Imagen
+            </label>
+
             <input
-              type="text"
-              name="imageUrl"
-              value={formData.imageUrl}
-              onChange={handleChange}
-              placeholder="/categorias/ejemplo.png"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2"
             />
-            <p className="mt-1 text-xs text-slate-400">Opcional</p>
+
+            {preview && (
+              <div className="mt-4 max-w-xs">
+                <img
+                  src={preview}
+                  alt="Vista previa"
+                  className="aspect-square w-full rounded-lg border object-cover"
+                />
+
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className="mt-2 rounded-lg bg-red-500 px-4 py-2 text-white"
+                >
+                  Eliminar imagen
+                </button>
+              </div>
+            )}
+
+            {!preview && (
+              <p className="mt-1 text-xs text-slate-400">
+                Opcional. Puedes crear el producto sin imagen.
+              </p>
+            )}
           </div>
 
           <div className="mt-2 flex items-center">
