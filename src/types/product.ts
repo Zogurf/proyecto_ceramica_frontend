@@ -23,3 +23,16 @@ export interface RelatedProduct {
     price: number;
     imageUrl: string;
 }
+
+// features/products/types/product.ts
+
+export interface FeaturedProduct {
+  id: number;
+  name: string;
+  price: number;
+  stock: number;
+  imageUrl: string;
+  status: boolean;
+  categoryId: number;
+  categoryName: string;
+}
