@@ -43,7 +43,7 @@ export function convertToFeaturedProduct(product: ApiProduct): FeaturedProduct {
   const tonos = categoryTones[product.categoryName] || defaultTones;
 
   // Generar descripción básica si no existe
-  const descripcion = `Hermosa pieza de cerámica ${product.categoryName.toLowerCase()}, elaborada artesanalmente con acabados de alta calidad.`;
+  const descripcion = `Hermosa pieza de cerámica ${(product.categoryName || '').toLowerCase()}, elaborada artesanalmente con acabados de alta calidad.`;
 
   // Determinar etiqueta basada en stock
   let etiqueta = "NUEVO";
@@ -69,19 +69,73 @@ export function convertToFeaturedProduct(product: ApiProduct): FeaturedProduct {
   };
 }
 
+// Orden personalizado de productos para la página principal
+const PRODUCT_ORDER = [
+  "Aguila Calva",
+  "Buho Coral",
+  "Buho Graduado",
+  "Foca Costera",
+  "Jaguar Ambar",
+  "Tigre Imperial",
+  "Chirimoya",
+  "Fresa",
+  "Manzana",
+  "Naranja",
+  "Pera",
+  "Sandia",
+  "Condor Andino",
+  "Conejo de Pascua",
+  "Delfin Perla Azul",
+  "Gato Marfil",
+  "Pez Esmeralda",
+  "Raton Nevado",
+  "Delfin Zafiro",
+  "Flamengo Rosa del Tropico",
+  "Llama Tradicional",
+  "Lobo Marino Ambar",
+  "Pez Palometa Dorado",
+  "Vaca Lola",
+  "Caballo Pucara Rojo",
+  "Casa de Belen",
+  "Celebracion Celestial",
+  "Ekeko de la Abundancia",
+  "Ekeko de la Prosperidad",
+  "Llama Acuatica",
+];
+
 // Obtener productos destacados desde la API
 export async function getFeaturedProducts(): Promise<FeaturedProduct[]> {
   try {
     // Intentar obtener productos desde el endpoint público de productos
     const products = await apiRequest<ApiProduct[]>("/api/products");
     
-    // Filtrar solo productos activos y obtener los últimos 8 (más recientes)
-    const activeProducts = products
-      .filter(p => p.status)
-      .sort((a, b) => b.id - a.id) // Ordenar por ID descendente (más recientes primero)
-      .slice(0, 8); // Obtener los últimos 8
+    // Filtrar solo productos activos
+    const activeProducts = products.filter(p => p.status);
     
-    return activeProducts.map(convertToFeaturedProduct);
+    // Convertir a FeaturedProduct
+    const featuredProducts = activeProducts.map(convertToFeaturedProduct);
+    
+    // Ordenar según el orden personalizado
+    featuredProducts.sort((a, b) => {
+      const indexA = PRODUCT_ORDER.findIndex(name => 
+        a.nombre.toLowerCase().includes(name.toLowerCase())
+      );
+      const indexB = PRODUCT_ORDER.findIndex(name => 
+        b.nombre.toLowerCase().includes(name.toLowerCase())
+      );
+      
+      // Si ambos están en la lista, ordenar por índice
+      if (indexA !== -1 && indexB !== -1) {
+        return indexA - indexB;
+      }
+      // Si solo uno está en la lista, ese va primero
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+      // Si ninguno está, mantener orden original
+      return 0;
+    });
+    
+    return featuredProducts;
   } catch (error) {
     console.error("Error al obtener productos destacados:", error);
     return [];
