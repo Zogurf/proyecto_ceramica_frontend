@@ -8,18 +8,6 @@
   alt: string;
 };
 
-export type FeaturedProduct = {
-  id: number;
-  nombre: string;
-  precio: number;
-  descripcion: string;
-  etiqueta: string;
-  formato: string;
-  tonos: [string, string];
-  image: string;
-  alt: string;
-};
-
 export type BrandValue = {
   id: number;
   title: string;
@@ -56,20 +44,6 @@ export const categories: Category[] = [
   },
 ];
 
-
-export const featuredProducts: FeaturedProduct[] = [
-  {
-    id: 1,                   
-    nombre: "Loro azul",    
-    precio: 85.50,   
-    descripcion: "Ceramica artesanal de un loro azul. Pieza decorativa hecha a mano con acabados brillantes.",
-    etiqueta: "Nueva colección",
-    formato: "Figura decorativa",
-    tonos: ["#d9bfae", "#b77d59"],
-    image: "/categorias/loro.png",
-    alt: "Figura de loro azul de cerámica",
-  },
-];
 
 export const brandValues: BrandValue[] = [
   {

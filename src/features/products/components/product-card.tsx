@@ -7,25 +7,22 @@ import type { AuthUser } from "@/features/auth/types";
 type Props = {
   producto: {
     id: number;
-    nombre: string;
-    precio: number;
-    descripcion: string;
-    etiqueta: string;
-    formato: string;
-    tonos: [string, string];
-    image: string;
-    alt: string;
+    name: string;
+    price: number;
+    stock: number;
+    imageUrl: string;
+    status: boolean;
+    categoryId: number;
+    categoryName: string;
   };
-  user: AuthUser | null;
-  onRequireAuth: () => void;
 };
 
-export default function ProductCard(props: Props) {
-  const { producto } = props;
+export default function ProductCard({
+  producto,
+}: Props) {
   const router = useRouter();
 
   const handleComprar = () => {
-    console.log("ID del producto:", producto.id);
     router.push(`/producto/${producto.id}`);
   };
 
@@ -34,16 +31,17 @@ export default function ProductCard(props: Props) {
       <div
         className="image-card relative overflow-hidden rounded-[1.6rem]"
         style={{
-          background: `linear-gradient(140deg, ${producto.tonos[0]} 0%, ${producto.tonos[1]} 100%)`,
+          background:
+            "linear-gradient(140deg, #d9bfae 0%, #b77d59 100%)",
         }}
       >
         <span className="absolute left-4 top-4 z-10 inline-flex rounded-full border border-white/35 bg-[rgba(37,23,15,0.48)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white backdrop-blur-sm">
-          {producto.etiqueta}
+          {producto.categoryName}
         </span>
 
         <Image
-          src={producto.image}
-          alt={producto.alt}
+          src={producto.imageUrl || "/placeholder-product.png"}
+          alt={producto.name}
           width={1200}
           height={1000}
           loading="eager"
@@ -54,13 +52,23 @@ export default function ProductCard(props: Props) {
       <div className="space-y-4 px-2 pb-2 pt-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="font-display text-3xl text-[--foreground]">{producto.nombre}</h3>
-            <p className="mt-1 text-sm text-[--muted]">{producto.formato}</p>
+            <h3 className="font-display text-3xl text-[--foreground]">
+              {producto.name}
+            </h3>
+
+            <p className="mt-1 text-sm text-[--muted]">
+              Cerámica artesanal
+            </p>
           </div>
-          <p className="text-base font-semibold text-[--foreground]">S/{producto.precio}</p>
+
+          <p className="text-base font-semibold text-[--foreground]">
+            S/ {producto.price.toFixed(2)}
+          </p>
         </div>
 
-        <p className="text-sm leading-6 text-[--muted]">{producto.descripcion}</p>
+        <p className="text-sm leading-6 text-[--muted]">
+          Stock disponible: {producto.stock} unidades.
+        </p>
 
         <button
           onClick={handleComprar}

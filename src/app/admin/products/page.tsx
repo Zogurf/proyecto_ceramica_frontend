@@ -22,6 +22,7 @@ export default function AdminProductsPage() {
   const [productToEdit, setProductToEdit] = useState<AdminProductResponse | null>(null);
   
   const [isExporting, setIsExporting] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -102,6 +103,29 @@ export default function AdminProductsPage() {
     }
   };
 
+  const handleExportPdf = async () => {
+    try {
+      setIsExportingPdf(true);
+      const response = await fetch("http://localhost:8080/api/excel/pdf/products"); 
+      if (!response.ok) throw new Error("Error al exportar PDF");
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `productos_${Date.now()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      alert("Hubo un problema al exportar el PDF");
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
+
   if (loading) {
     return <div className="text-slate-500">Cargando productos...</div>;
   }
@@ -123,6 +147,15 @@ export default function AdminProductsPage() {
           >
             {isExporting ? "Exportando..." : "Exportar a Excel"}
           </button>
+
+          <button
+            onClick={handleExportPdf}
+            disabled={isExportingPdf}
+            className="rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+          >
+            {isExportingPdf ? "Exportando..." : "Exportar a PDF"}
+          </button>
+
           <button
             onClick={openNewModal}
             className="rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"

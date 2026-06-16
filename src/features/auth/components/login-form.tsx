@@ -16,7 +16,6 @@ export default function LoginForm({ onLogin, onForgotPassword }: Props) {
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const buttonRef = useRef<HTMLDivElement | null>(null);
 
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -39,7 +38,6 @@ export default function LoginForm({ onLogin, onForgotPassword }: Props) {
         client_id: clientId,
         callback: async ({ credential }) => {
           setLoading(true);
-          setError("");
 
           try {
             const data = await loginWithGoogle(credential);
@@ -49,8 +47,7 @@ export default function LoginForm({ onLogin, onForgotPassword }: Props) {
             toast.success(`¡Bienvenido ${data.name}!`);
             onLogin({ name: data.name, role: data.role });
           } catch (err: unknown) {
-            const errorMsg = err instanceof Error ? err.message : "Error al iniciar con Google";
-            setError(errorMsg);
+            const errorMsg = "Error al iniciar con Google";
             toast.error(errorMsg);
           } finally {
             setLoading(false);
@@ -76,10 +73,9 @@ export default function LoginForm({ onLogin, onForgotPassword }: Props) {
   const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
 
     if (!email || !password) {
-      setError("Completa tu correo y contraseña.");
+      toast.error("Completa tu correo y contraseña.");
       setLoading(false);
       return;
     }
@@ -92,9 +88,8 @@ export default function LoginForm({ onLogin, onForgotPassword }: Props) {
       toast.success(`¡Bienvenido ${data.name}!`);
       onLogin({ name: data.name, role: data.role });
     } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : "Error al iniciar sesión";
-      setError(errorMsg);
-      toast.error(errorMsg);
+      toast.error("Error al iniciar sesión");
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -125,7 +120,7 @@ export default function LoginForm({ onLogin, onForgotPassword }: Props) {
             </div>
           ) : (
             <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-              Falta configurar NEXT_PUBLIC_GOOGLE_CLIENT_ID en el frontend.
+              Servidor no conectado.
             </p>
           )}
 
@@ -174,11 +169,6 @@ export default function LoginForm({ onLogin, onForgotPassword }: Props) {
             >
               {loading ? "Iniciando sesión..." : "Entrar con correo"}
             </button>
-            {error && (
-              <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-                {error}
-              </p>
-            )}
           </form>
         </div>
       </div>
