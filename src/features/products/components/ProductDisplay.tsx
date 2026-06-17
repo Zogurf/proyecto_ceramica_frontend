@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import FooterPublic from "@/components/shared/footer-public";
 import { useCart } from "@/features/cart/cart-context";
 import { getProductById } from "@/features/products/services/product-service";
+import { apiRequest } from "@/lib/api-client";
+import { getProductImageSrc } from "@/lib/images";
 import type { ProductDetail } from "@/types/product";
 
 interface ProductDisplayProps {
@@ -23,7 +25,7 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
 
   useEffect(() => {
     let ignore = false;
-
+    let bandera = false;
     const fetchProduct = async () => {
       try {
         setLoading(true);
@@ -36,6 +38,15 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
           setSelectedSizeId(data.sizes?.[0]?.id ?? null);
           setCantidad(1);
         }
+        bandera = true;
+        if (!bandera) return;
+        console.log("Entro")
+        apiRequest<void>("/api/purchase-intentions", {
+          method: "POST",
+          body: { productId },
+        }).catch( (
+        ) => undefined,);
+
       } catch (err) {
         if (!ignore) {
           setError(err instanceof Error ? err.message : "Error al cargar producto");
@@ -105,7 +116,7 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
       productId: product.id,
       name: product.name,
       price: Number(product.price),
-      imageUrl: product.imageUrl,
+      imageUrl: getProductImageSrc(product.imageUrl),
       sizeId: selectedSize.id,
       sizeName: selectedSize.name,
       sizeDimension: selectedSize.dimension,
@@ -122,7 +133,7 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
             <div className="image-card overflow-hidden rounded-[1.6rem]">
               <div className="relative aspect-square w-full">
                 <Image
-                  src={product.imageUrl || "/categorias/default.webp"}
+                  src={getProductImageSrc(product.imageUrl)}
                   alt={product.name}
                   fill
                   className="object-cover"
@@ -284,7 +295,7 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
                   <div className="image-card overflow-hidden rounded-[1.2rem]">
                     <div className="relative aspect-square w-full">
                       <Image
-                        src={related.imageUrl || "/categorias/default.webp"} 
+                        src={getProductImageSrc(related.imageUrl)}
                         alt={related.name}
                         fill
                         className="object-cover transition duration-500 group-hover:scale-[1.03]"

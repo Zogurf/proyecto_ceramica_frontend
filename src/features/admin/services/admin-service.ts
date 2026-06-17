@@ -43,6 +43,50 @@ export interface AdminCategoryRequest {
   imageUrl: string;
 }
 
+export interface AdminOrderItemResponse {
+  productId: number;
+  productName: string;
+  imageUrl: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+  sizeName?: string;
+  sizeDimension?: string;
+}
+
+export interface AdminOrderResponse {
+  id: number;
+  status: string;
+  registerDate: string;
+  total: number;
+  customerName: string;
+  items: AdminOrderItemResponse[];
+}
+
+export interface PurchaseIntentResponse {
+  id: number;
+  productId: number;
+  productName: string;
+  customerName: string;
+  email: string;
+  viewedAt: string;
+}
+
+export interface CampaignRequest {
+  productId: number;
+  theme: string;
+  offerText: string;
+  startDate?: string;
+  endDate?: string;
+  subject?: string;
+}
+
+export interface CampaignResponse {
+  recipients: number;
+  subject: string;
+  htmlPreview: string;
+}
+
 export const adminService = {
   getUsers: () => apiRequest<AdminUserResponse[]>("/api/admin/users"),
 
@@ -82,5 +126,23 @@ export const adminService = {
   deleteCategory: (id: number) =>
     apiRequest<void>(`/api/categories/${id}`, {
       method: "DELETE"
+    }),
+
+  getOrders: () => apiRequest<AdminOrderResponse[]>("/api/admin/orders"),
+
+  getPurchaseIntentions: (startDate?: string, endDate?: string) => {
+    const params = new URLSearchParams();
+    if (startDate) params.set("startDate", startDate);
+    if (endDate) params.set("endDate", endDate);
+    const query = params.toString();
+    return apiRequest<PurchaseIntentResponse[]>(
+      `/api/admin/purchase-intentions${query ? `?${query}` : ""}`
+    );
+  },
+
+  sendCampaign: (data: CampaignRequest) =>
+    apiRequest<CampaignResponse>("/api/admin/campaigns", {
+      method: "POST",
+      body: data
     }),
 };

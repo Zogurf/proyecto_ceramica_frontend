@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import type { AuthUser } from "@/features/auth/types";
+import { getProductImageSrc } from "@/lib/images";
 
 type Props = {
   producto: {
@@ -40,7 +40,7 @@ export default function ProductCard({
         </span>
 
         <Image
-          src={producto.imageUrl || "/placeholder-product.png"}
+          src={getProductImageSrc(producto.imageUrl)}
           alt={producto.name}
           width={1200}
           height={1000}

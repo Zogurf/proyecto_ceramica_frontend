@@ -11,8 +11,8 @@ type TimeFilter = "today" | "weekly" | "monthly";
 export default function AdminDashboardPage() {
     const [productCount, setProductCount] = useState<number>(0);
     const [userCount, setUserCount] = useState<number>(0);
-    const [salesCount, setSalesCount] = useState<number>(300); // Este dato es temporal :v
-    const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(12); // lo mismo con este, sino saldría 0
+    const [salesCount, setSalesCount] = useState<number>(0);
+    const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0);
     const [loading, setLoading] = useState(true);
 
     // Estado para controlar el filtro del gráfico de ingresos
@@ -66,9 +66,10 @@ export default function AdminDashboardPage() {
         const fetchDashboardData = async () => {
             try {
                 setLoading(true);
-                const [products, users] = await Promise.all([
+                const [products, users, orders] = await Promise.all([
                     adminService.getProducts(),
-                    adminService.getUsers()
+                    adminService.getUsers(),
+                    adminService.getOrders()
                 ]);
 
                 const totalStock = products.reduce((accumulator, product) => {
@@ -93,6 +94,12 @@ export default function AdminDashboardPage() {
 
                 setProductCount(totalStock);
                 setUserCount(users.length);
+                setSalesCount(
+                    orders
+                        .filter((order) => order.status === "PAID")
+                        .reduce((total, order) => total + order.total, 0)
+                );
+                setPendingOrdersCount(orders.filter((order) => order.status === "PENDING").length);
             } catch (error) {
                 console.error("Error al cargar métricas del dashboard", error);
             } finally {

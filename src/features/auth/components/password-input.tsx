@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, forwardRef } from "react";
+import { useState, forwardRef, type InputHTMLAttributes } from "react";
 
-interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+type PasswordInputProps = InputHTMLAttributes<HTMLInputElement>;
 
 export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
   ({ className, ...props }, ref) => {
