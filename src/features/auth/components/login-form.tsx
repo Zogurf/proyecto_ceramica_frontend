@@ -5,6 +5,7 @@ import Script from "next/script";
 import toast from "react-hot-toast";
 import { notifyAuthChanged } from "@/features/auth/hooks/useAuth";
 import { loginWithEmail, loginWithGoogle } from "@/features/auth/services/auth-service";
+import { PasswordInput } from "./password-input";
 
 type Props = {
   onLogin: (user: { name: string; role: string }) => void;
@@ -143,13 +144,11 @@ export default function LoginForm({ onLogin, onForgotPassword }: Props) {
             </label>
             <label className="grid gap-1 text-sm font-semibold text-[--foreground]">
               Contrasena
-              <input
-                type="password"
+              <PasswordInput
                 placeholder="Ingresa tu contrasena"
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="rounded-2xl border border-[rgba(78,54,39,0.14)] bg-[#fffaf7] px-4 py-3 font-normal text-[--foreground] outline-none transition placeholder:text-[#8b7667] focus:border-[--accent] focus:bg-white focus:shadow-[0_0_0_3px_rgba(165,111,83,0.14)]"
                 required
               />
             </label>

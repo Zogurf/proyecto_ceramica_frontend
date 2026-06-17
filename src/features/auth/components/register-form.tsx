@@ -4,6 +4,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { registerUser } from "@/features/auth/services/auth-service";
 import { findPersonByDni } from "@/features/auth/services/persona-service";
+import { PasswordInput } from "@/features/auth/components/password-input";
 
 type Props = {
   onRegister: () => void;
@@ -141,13 +142,11 @@ export default function RegisterForm({ onRegister }: Props) {
         className="rounded-2xl border border-[rgba(78,54,39,0.14)] bg-[#fffaf7] px-4 py-3 text-[--foreground] outline-none transition placeholder:text-[#8b7667] focus:border-[--accent] focus:bg-white"
         required
       />
-      <input
-        type="password"
+      <PasswordInput
         placeholder="Contraseña"
         autoComplete="off"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="rounded-2xl border border-[rgba(78,54,39,0.14)] bg-[#fffaf7] px-4 py-3 text-[--foreground] outline-none transition placeholder:text-[#8b7667] focus:border-[--accent] focus:bg-white"
         required
       />
       <button
