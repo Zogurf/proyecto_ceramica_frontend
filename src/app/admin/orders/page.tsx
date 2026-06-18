@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { adminService, type AdminOrderResponse } from "@/features/admin/services/admin-service";
+
+function fulfillmentLabel(status: string) {
+  return status === "SHIPPED" ? "Enviado" : "Pendiente de envio";
+}
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<AdminOrderResponse[]>([]);
@@ -23,6 +28,18 @@ export default function AdminOrdersPage() {
     void fetchOrders();
   }, []);
 
+  const handleFulfillmentChange = async (orderId: number, fulfillmentStatus: string) => {
+    try {
+      const updated = await adminService.updateOrderFulfillment(orderId, fulfillmentStatus);
+      setOrders((currentOrders) =>
+        currentOrders.map((order) => (order.id === updated.id ? updated : order))
+      );
+      toast.success("Estado de envio actualizado");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "No se pudo actualizar el estado");
+    }
+  };
+
   if (loading) return <div className="text-slate-500">Cargando pedidos...</div>;
   if (error) return <div className="text-red-500">Error: {error}</div>;
 
@@ -30,7 +47,9 @@ export default function AdminOrdersPage() {
     <div>
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-slate-900">Ventas y pedidos</h1>
-        <p className="mt-2 text-sm text-slate-500">Pagos realizados y pedidos pendientes.</p>
+        <p className="mt-2 text-sm text-slate-500">
+          Revisa pagos y actualiza el estado de envio de cada compra.
+        </p>
       </div>
 
       <div className="space-y-4">
@@ -40,15 +59,32 @@ export default function AdminOrdersPage() {
               <div>
                 <h2 className="text-lg font-bold text-slate-900">Pedido #{order.id}</h2>
                 <p className="text-sm text-slate-500">{order.customerName}</p>
-                <p className="text-xs text-slate-400">
+                <p className="text-sm text-slate-500">{order.customerEmail}</p>
+                <p className="mt-2 text-sm text-slate-600">{order.shippingAddress}</p>
+                {order.shippingReference && (
+                  <p className="text-xs text-slate-400">{order.shippingReference}</p>
+                )}
+                <p className="mt-2 text-xs text-slate-400">
                   {new Date(order.registerDate).toLocaleString("es-PE")}
                 </p>
               </div>
-              <div className="text-left md:text-right">
-                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-                  {order.status}
+              <div className="min-w-52 text-left md:text-right">
+                <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700">
+                  {order.status === "PAID" ? "Pagado" : "Pendiente de pago"}
                 </span>
                 <p className="mt-2 text-xl font-bold text-slate-900">S/{order.total.toFixed(2)}</p>
+                <label className="mt-3 grid gap-1 text-xs font-semibold text-slate-500 md:text-left">
+                  Estado de envio
+                  <select
+                    value={order.fulfillmentStatus}
+                    onChange={(event) => handleFulfillmentChange(order.id, event.target.value)}
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal text-slate-900"
+                  >
+                    <option value="PENDING_SHIPMENT">Pendiente de envio</option>
+                    <option value="SHIPPED">Enviado</option>
+                  </select>
+                </label>
+                <p className="mt-2 text-xs text-slate-500">{fulfillmentLabel(order.fulfillmentStatus)}</p>
               </div>
             </div>
 

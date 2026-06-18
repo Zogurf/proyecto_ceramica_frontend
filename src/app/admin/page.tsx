@@ -33,14 +33,14 @@ export default function AdminLoginPage() {
       }
 
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify({ name: data.name, role: data.role }));
+      localStorage.setItem("user", JSON.stringify({ name: data.name, role: data.role, email: data.email }));
       notifyAuthChanged();
       toast.success(`Bienvenido ${data.name}`);
       router.replace("/admin/dashboard");
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Error al iniciar sesion";
-      setError(message);
-      toast.error(message);
+      //const message = err instanceof Error ? err.message : "Error al iniciar sesion";
+      //setError(message);
+      toast.error("Credenciales invalidas");
     } finally {
       setLoading(false);
     }
@@ -103,12 +103,6 @@ export default function AdminLoginPage() {
                   className="rounded-lg border border-slate-300 bg-white px-4 py-3 font-normal text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
                 />
               </label>
-
-              {error && (
-                <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {error}
-                </p>
-              )}
 
               <button
                 type="submit"

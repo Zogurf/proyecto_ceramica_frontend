@@ -7,6 +7,13 @@ export interface CheckoutResponse {
   orderId: number;
 }
 
+export interface CheckoutCustomerInfo {
+  customerName: string;
+  customerEmail: string;
+  shippingAddress: string;
+  shippingReference?: string;
+}
+
 export interface OrderItemResponse {
   productId: number;
   productName: string;
@@ -21,16 +28,21 @@ export interface OrderItemResponse {
 export interface OrderResponse {
   id: number;
   status: string;
+  fulfillmentStatus: string;
   registerDate: string;
   total: number;
   customerName: string;
+  customerEmail: string;
+  shippingAddress: string;
+  shippingReference?: string;
   items: OrderItemResponse[];
 }
 
-export function createCheckoutSession(items: CartItem[]) {
+export function createCheckoutSession(items: CartItem[], customerInfo: CheckoutCustomerInfo) {
   return apiRequest<CheckoutResponse>("/api/checkout/session", {
     method: "POST",
     body: {
+      ...customerInfo,
       items: items.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
@@ -43,4 +55,12 @@ export function createCheckoutSession(items: CartItem[]) {
 
 export function confirmCheckoutSession(sessionId: string) {
   return apiRequest<OrderResponse>(`/api/checkout/confirm?sessionId=${encodeURIComponent(sessionId)}`);
+}
+
+export function getMyOrders() {
+  return apiRequest<OrderResponse[]>("/api/checkout/orders");
+}
+
+export function getMyOrder(orderId: number) {
+  return apiRequest<OrderResponse>(`/api/checkout/orders/${orderId}`);
 }

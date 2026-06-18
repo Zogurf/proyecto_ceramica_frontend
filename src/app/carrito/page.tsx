@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import FooterPublic from "@/components/shared/footer-public";
 import { useCart } from "@/features/cart/cart-context";
 import { createCheckoutSession } from "@/features/checkout/checkout-service";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { getProductImageSrc } from "@/lib/images";
 
 export default function CartPage() {
@@ -18,7 +19,17 @@ export default function CartPage() {
     decreaseItem,
     removeItem,
   } = useCart();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [shippingAddress, setShippingAddress] = useState("");
+  const [shippingReference, setShippingReference] = useState("");
+
+  useEffect(() => {
+    setCustomerName(user?.name ?? "");
+    setCustomerEmail(user?.email ?? "");
+  }, [user]);
 
   const handleCheckout = async () => {
     if (items.length === 0) {
@@ -26,9 +37,19 @@ export default function CartPage() {
       return;
     }
 
+    if (!customerName.trim() || !customerEmail.trim() || !shippingAddress.trim()) {
+      toast.error("Completa nombre, correo y direccion de entrega");
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await createCheckoutSession(items);
+      const response = await createCheckoutSession(items, {
+        customerName: customerName.trim(),
+        customerEmail: customerEmail.trim(),
+        shippingAddress: shippingAddress.trim(),
+        shippingReference: shippingReference.trim(),
+      });
       window.location.href = response.checkoutUrl;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "No se pudo iniciar el pago";
@@ -132,6 +153,49 @@ export default function CartPage() {
 
             <aside className="h-fit rounded-[1.5rem] border border-[--border-soft] bg-white p-6 shadow-[0_18px_45px_rgba(77,50,36,0.08)]">
               <h2 className="text-xl font-bold text-[--foreground]">Resumen</h2>
+              <div className="mt-5 space-y-3">
+                <label className="grid gap-1 text-sm font-semibold text-[--foreground]">
+                  Nombre
+                  <input
+                    value={customerName}
+                    onChange={(event) => setCustomerName(event.target.value)}
+                    autoComplete="name"
+                    className="rounded-2xl border border-[--border-soft] bg-[#fffaf7] px-4 py-3 font-normal outline-none focus:border-[--accent]"
+                    required
+                  />
+                </label>
+                <label className="grid gap-1 text-sm font-semibold text-[--foreground]">
+                  Correo electronico
+                  <input
+                    type="email"
+                    value={customerEmail}
+                    onChange={(event) => setCustomerEmail(event.target.value)}
+                    autoComplete="email"
+                    className="rounded-2xl border border-[--border-soft] bg-[#fffaf7] px-4 py-3 font-normal outline-none focus:border-[--accent]"
+                    required
+                  />
+                </label>
+                <label className="grid gap-1 text-sm font-semibold text-[--foreground]">
+                  Direccion
+                  <input
+                    value={shippingAddress}
+                    onChange={(event) => setShippingAddress(event.target.value)}
+                    autoComplete="street-address"
+                    placeholder="Av. / Calle / distrito"
+                    className="rounded-2xl border border-[--border-soft] bg-[#fffaf7] px-4 py-3 font-normal outline-none focus:border-[--accent]"
+                    required
+                  />
+                </label>
+                <label className="grid gap-1 text-sm font-semibold text-[--foreground]">
+                  Referencia
+                  <textarea
+                    value={shippingReference}
+                    onChange={(event) => setShippingReference(event.target.value)}
+                    placeholder="Color de puerta, piso, indicaciones..."
+                    className="min-h-24 resize-none rounded-2xl border border-[--border-soft] bg-[#fffaf7] px-4 py-3 font-normal outline-none focus:border-[--accent]"
+                  />
+                </label>
+              </div>
               <div className="mt-5 space-y-3 border-y border-[--border-soft] py-5 text-sm">
                 <div className="flex justify-between text-[--muted]">
                   <span>Productos</span>

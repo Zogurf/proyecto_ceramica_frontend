@@ -57,9 +57,13 @@ export interface AdminOrderItemResponse {
 export interface AdminOrderResponse {
   id: number;
   status: string;
+  fulfillmentStatus: string;
   registerDate: string;
   total: number;
   customerName: string;
+  customerEmail: string;
+  shippingAddress: string;
+  shippingReference?: string;
   items: AdminOrderItemResponse[];
 }
 
@@ -129,6 +133,12 @@ export const adminService = {
     }),
 
   getOrders: () => apiRequest<AdminOrderResponse[]>("/api/admin/orders"),
+
+  updateOrderFulfillment: (id: number, fulfillmentStatus: string) =>
+    apiRequest<AdminOrderResponse>(`/api/admin/orders/${id}/fulfillment`, {
+      method: "PUT",
+      body: { fulfillmentStatus }
+    }),
 
   getPurchaseIntentions: (startDate?: string, endDate?: string) => {
     const params = new URLSearchParams();

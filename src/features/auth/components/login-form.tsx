@@ -6,9 +6,10 @@ import toast from "react-hot-toast";
 import { notifyAuthChanged } from "@/features/auth/hooks/useAuth";
 import { loginWithEmail, loginWithGoogle } from "@/features/auth/services/auth-service";
 import { PasswordInput } from "./password-input";
+import type { AuthUser } from "@/features/auth/types";
 
 type Props = {
-  onLogin: (user: { name: string; role: string }) => void;
+  onLogin: (user: AuthUser) => void;
   onForgotPassword: () => void;
 };
 
@@ -43,10 +44,10 @@ export default function LoginForm({ onLogin, onForgotPassword }: Props) {
           try {
             const data = await loginWithGoogle(credential);
             localStorage.setItem("token", data.token);
-            localStorage.setItem("user", JSON.stringify({ name: data.name, role: data.role }));
+            localStorage.setItem("user", JSON.stringify({ name: data.name, role: data.role, email: data.email }));
             notifyAuthChanged();
             toast.success(`¡Bienvenido ${data.name}!`);
-            onLogin({ name: data.name, role: data.role });
+            onLogin({ name: data.name, role: data.role, email: data.email });
           } catch (err: unknown) {
             const errorMsg = "Error al iniciar con Google";
             toast.error(errorMsg);
@@ -84,10 +85,10 @@ export default function LoginForm({ onLogin, onForgotPassword }: Props) {
     try {
       const data = await loginWithEmail({ email, password });
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify({ name: data.name, role: data.role }));
+      localStorage.setItem("user", JSON.stringify({ name: data.name, role: data.role, email: data.email }));
       notifyAuthChanged();
       toast.success(`¡Bienvenido ${data.name}!`);
-      onLogin({ name: data.name, role: data.role });
+      onLogin({ name: data.name, role: data.role, email: data.email });
     } catch (err: unknown) {
       toast.error("Error al iniciar sesión");
       console.error(err);

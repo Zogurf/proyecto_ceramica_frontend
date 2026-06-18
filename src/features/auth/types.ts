@@ -1,6 +1,7 @@
 export type AuthUser = {
   name: string;
   role: string;
+  email?: string;
 };
 
 export type AuthModalProps = {
