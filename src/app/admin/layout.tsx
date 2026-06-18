@@ -56,7 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Categorias", href: "/admin/categories" },
     { name: "Pedidos", href: "/admin/orders" },
     { name: "Intenciones", href: "/admin/intentions" },
-    { name: "Campanas", href: "/admin/campaigns" },
+    { name: "Campañas", href: "/admin/campaigns" },
   ];
 
   return (

@@ -78,11 +78,11 @@ export interface PurchaseIntentResponse {
 
 export interface CampaignRequest {
   productId: number;
-  theme: string;
   offerText: string;
   startDate?: string;
   endDate?: string;
-  subject?: string;
+  subject: string;
+  htmlTemplate?: string;
 }
 
 export interface CampaignResponse {
@@ -149,6 +149,12 @@ export const adminService = {
       `/api/admin/purchase-intentions${query ? `?${query}` : ""}`
     );
   },
+
+  previewCampaign: (data: CampaignRequest) =>
+    apiRequest<CampaignResponse>("/api/admin/campaigns/preview", {
+      method: "POST",
+      body: data
+    }),
 
   sendCampaign: (data: CampaignRequest) =>
     apiRequest<CampaignResponse>("/api/admin/campaigns", {

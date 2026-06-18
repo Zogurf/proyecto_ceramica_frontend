@@ -25,7 +25,7 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
 
   useEffect(() => {
     let ignore = false;
-    let bandera = false;
+
     const fetchProduct = async () => {
       try {
         setLoading(true);
@@ -38,14 +38,15 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
           setSelectedSizeId(data.sizes?.[0]?.id ?? null);
           setCantidad(1);
         }
-        bandera = true;
-        if (!bandera) return;
-        console.log("Entro")
+
+        if (ignore) {
+          return;
+        }
+
         apiRequest<void>("/api/purchase-intentions", {
           method: "POST",
           body: { productId },
-        }).catch( (
-        ) => undefined,);
+        }).catch(() => undefined);
 
       } catch (err) {
         if (!ignore) {
