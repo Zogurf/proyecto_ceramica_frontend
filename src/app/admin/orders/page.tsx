@@ -2,10 +2,37 @@
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { FaWhatsapp } from "react-icons/fa";
+import { SiGmail } from "react-icons/si";
 import { adminService, type AdminOrderResponse } from "@/features/admin/services/admin-service";
 
 function fulfillmentLabel(status: string) {
   return status === "SHIPPED" ? "Enviado" : "Pendiente de envio";
+}
+
+function orderMessage(order: AdminOrderResponse) {
+  const products = order.items
+    .map((item) => `${item.productName} x${item.quantity}`)
+    .join(", ");
+  return `Hola ${order.customerName}, te contactamos de El mundo de Mery sobre tu pedido #${order.id} (${products}), por un total de S/ ${order.total.toFixed(2)}. Estado: ${order.status === "PAID" ? "pagado" : "pendiente de pago"} y ${fulfillmentLabel(order.fulfillmentStatus).toLowerCase()}.`;
+}
+
+function gmailUrl(order: AdminOrderResponse) {
+  const params = new URLSearchParams({
+    view: "cm",
+    fs: "1",
+    to: order.customerEmail,
+    su: `Información sobre tu pedido #${order.id} - El mundo de Mery`,
+    body: orderMessage(order),
+  });
+  return `https://mail.google.com/mail/?${params.toString()}`;
+}
+
+function whatsappUrl(order: AdminOrderResponse) {
+  let phone = (order.customerPhone || "").replace(/\D/g, "");
+  if (phone.startsWith("00")) phone = phone.slice(2);
+  if (phone.length === 9) phone = `51${phone}`;
+  return phone ? `https://wa.me/${phone}?text=${encodeURIComponent(orderMessage(order))}` : "";
 }
 
 export default function AdminOrdersPage() {
@@ -86,6 +113,40 @@ export default function AdminOrdersPage() {
                   </select>
                 </label>
                 <p className="mt-2 text-xs text-slate-500">{fulfillmentLabel(order.fulfillmentStatus)}</p>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <a
+                    href={gmailUrl(order)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+                    title={`Escribir a ${order.customerEmail}`}
+                  >
+                    <SiGmail className="text-lg" aria-hidden="true" />
+                    Gmail
+                  </a>
+                  {whatsappUrl(order) ? (
+                    <a
+                      href={whatsappUrl(order)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm font-semibold text-green-700 transition hover:bg-green-100"
+                      title={`Escribir al ${order.customerPhone}`}
+                    >
+                      <FaWhatsapp className="text-lg" aria-hidden="true" />
+                      WhatsApp
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-400"
+                      title="Este pedido no tiene celular registrado"
+                    >
+                      <FaWhatsapp className="text-lg" aria-hidden="true" />
+                      Sin número
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
