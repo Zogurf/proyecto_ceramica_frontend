@@ -55,7 +55,63 @@ export default function Home() {
   return (
     <>
       <main>
-        {/* ... Todo tu hero permanece igual ... */}
+        <section className="hero-shell">
+          <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 md:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-24">
+            <div className="space-y-8">
+              <span className="inline-flex rounded-full border border-[--border-soft] bg-white/75 px-4 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-[--muted]">
+                Colección 2026
+              </span>
+
+              <div className="space-y-6">
+                <h1 className="max-w-3xl font-display text-6xl leading-[0.92] text-[--foreground] md:text-7xl lg:text-8xl">
+                  Creamos cerámica. Tú defines el estilo.
+                </h1>
+                <p className="max-w-xl text-base leading-8 text-[--muted] md:text-lg">
+                  Diseñamos vasijas, figuras y piezas decorativas de sobremesa con una
+                  estética limpia, tonos tierra y presencia artesanal.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <a
+                  href="#destacados"
+                  className="inline-flex items-center justify-center rounded-full bg-[--foreground] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[--accent]"
+                >
+                  Ver productos destacados
+                </a>
+                <a
+                  href="#colecciones"
+                  className="inline-flex items-center justify-center rounded-full border border-[--border-strong] px-6 py-3.5 text-sm font-semibold text-[--foreground] transition hover:bg-white"
+                >
+                  Explorar colecciones
+                </a>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="rounded-[1.5rem] border border-[--border-soft] bg-white/80 p-4">
+                  <p className="text-xs uppercase tracking-[0.24em] text-[--muted]">
+                    Piezas
+                  </p>
+                  <p className="mt-3 font-display text-4xl text-[--foreground]">40+</p>
+                </div>
+                <div className="rounded-[1.5rem] border border-[--border-soft] bg-white/80 p-4">
+                  <p className="text-xs uppercase tracking-[0.24em] text-[--muted]">
+                    Acabado
+                  </p>
+                  <p className="mt-3 font-display text-4xl text-[--foreground]">Brillante </p>
+                </div>
+                <div className="rounded-[1.5rem] border border-[--border-soft] bg-white/80 p-4">
+                  <p className="text-xs uppercase tracking-[0.24em] text-[--muted]">
+                    Hecho
+                  </p>
+                  <p className="mt-3 font-display text-4xl text-[--foreground]">A mano</p>
+                </div>
+              </div>
+            </div>
+
+            <HeroShowcase />
+          </div>
+        </section>
 
         <section
           id="colecciones"
