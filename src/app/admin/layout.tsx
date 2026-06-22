@@ -52,7 +52,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { name: "Inicio", href: "/admin/dashboard" },
     { name: "Usuarios", href: "/admin/users" },
-    { name: "Productos", href: "/admin/productos" },
+    { name: "Productos", href: "/admin/products" },
     { name: "Categorias", href: "/admin/categories" },
     { name: "Pedidos", href: "/admin/orders" },
     { name: "Intenciones", href: "/admin/intentions" },

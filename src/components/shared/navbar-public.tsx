@@ -130,6 +130,13 @@ export default function Navbar() {
                 {showDropdown && (
                   <div className="absolute right-0 mt-3 min-w-44 rounded-2xl border border-[--border-soft] bg-white p-2 shadow-[0_20px_50px_rgba(51,31,21,0.14)]">
                     <Link
+                      href="/favoritos"
+                      onClick={() => setShowDropdown(false)}
+                      className="block w-full rounded-xl px-3 py-2 text-left text-sm text-[--foreground] transition hover:bg-[#fffaf7]"
+                    >
+                      Favoritos
+                    </Link>
+                    <Link
                       href="/mis-compras"
                       onClick={() => setShowDropdown(false)}
                       className="block w-full rounded-xl px-3 py-2 text-left text-sm text-[--foreground] transition hover:bg-[#fffaf7]"

@@ -1,139 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  adminService,
-  type PurchaseIntentResponse,
-} from "@/features/admin/services/admin-service";
+import { useCallback, useEffect, useState } from "react";
+import { adminService, type CategoryIntentAnalyticsResponse } from "@/features/admin/services/admin-service";
 
-function todayIso() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function daysAgoIso(days: number) {
-  const date = new Date();
-  date.setDate(date.getDate() - days);
-  return date.toISOString().slice(0, 10);
-}
+const iso = (days = 0) => { const date = new Date(); date.setDate(date.getDate() - days); return date.toISOString().slice(0, 10); };
 
 export default function AdminIntentionsPage() {
-  const [intentions, setIntentions] = useState<PurchaseIntentResponse[]>([]);
-  const [startDate, setStartDate] = useState(daysAgoIso(30));
-  const [endDate, setEndDate] = useState(todayIso());
+  const [data, setData] = useState<CategoryIntentAnalyticsResponse[]>([]);
+  const [startDate, setStartDate] = useState(iso(30));
+  const [endDate, setEndDate] = useState(iso());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const load = useCallback(async () => { try { setLoading(true); setError(""); setData(await adminService.getCategoryIntentions(startDate, endDate)); } catch (e) { setError(e instanceof Error ? e.message : "Error al cargar análisis"); } finally { setLoading(false); } }, [startDate, endDate]);
+  useEffect(() => { void load(); }, [load]);
 
-  const groupedByProduct = useMemo(() => {
-    return intentions.reduce<Record<string, number>>((accumulator, intention) => {
-      accumulator[intention.productName] = (accumulator[intention.productName] || 0) + 1;
-      return accumulator;
-    }, {});
-  }, [intentions]);
-
-  const fetchIntentions = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
-      setIntentions(await adminService.getPurchaseIntentions(startDate, endDate));
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Error al cargar intenciones");
-    } finally {
-      setLoading(false);
-    }
-  }, [endDate, startDate]);
-
-  useEffect(() => {
-    void fetchIntentions();
-  }, [fetchIntentions]);
-
-  return (
-    <div>
-      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Intenciones por producto</h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Clientes que visitaron productos estando autenticados.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <input
-            type="date"
-            value={startDate}
-            onChange={(event) => setStartDate(event.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          />
-          <input
-            type="date"
-            value={endDate}
-            onChange={(event) => setEndDate(event.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          />
-          <button
-            onClick={fetchIntentions}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            Filtrar
-          </button>
-        </div>
-      </div>
-
-      {error && <div className="mb-4 text-red-500">Error: {error}</div>}
-
-      <div className="mb-6 grid gap-4 md:grid-cols-3">
-        {Object.entries(groupedByProduct).map(([productName, count]) => (
-          <div key={productName} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-sm font-semibold text-slate-900">{productName}</p>
-            <p className="mt-2 text-2xl font-bold text-blue-700">{count}</p>
-            <p className="text-xs text-slate-500">intenciones</p>
-          </div>
-        ))}
-      </div>
-
-      {loading ? (
-        <div className="text-slate-500">Cargando intenciones...</div>
-      ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Producto
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Cliente
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Correo
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Fecha
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 bg-white">
-              {intentions.map((intention) => (
-                <tr key={intention.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4 text-sm font-medium text-slate-900">
-                    {intention.productName}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-500">{intention.customerName}</td>
-                  <td className="px-6 py-4 text-sm text-slate-500">{intention.email}</td>
-                  <td className="px-6 py-4 text-sm text-slate-500">
-                    {new Date(intention.viewedAt).toLocaleString("es-PE")}
-                  </td>
-                </tr>
-              ))}
-              {intentions.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-6 py-4 text-center text-slate-500">
-                    No hay intenciones en este rango.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
+  return <div>
+    <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"><div><h1 className="text-3xl font-bold">Interés por categoría</h1><p className="mt-2 text-sm text-slate-500">Analiza vistas, carrito y favoritos para descubrir qué productos impulsan cada categoría.</p></div><div className="flex gap-2"><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="rounded-lg border px-3 py-2"/><input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="rounded-lg border px-3 py-2"/><button onClick={load} className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white">Filtrar</button></div></div>
+    {error && <div className="mb-4 text-red-600">{error}</div>}
+    {loading ? <p className="text-slate-500">Analizando interacciones...</p> : <div className="grid gap-5 lg:grid-cols-2">{data.map(category => <article key={category.categoryId} className="rounded-xl border bg-white p-5 shadow-sm"><div className="flex justify-between"><div><h2 className="text-xl font-bold">{category.categoryName}</h2><p className="text-sm text-slate-500">{category.uniqueCustomers} clientes interesados</p></div><strong className="text-2xl text-blue-700">{category.interactions}</strong></div><div className="mt-5 space-y-2">{category.topProducts.map((product, index) => <div key={product.productId} className="flex justify-between rounded-lg bg-slate-50 p-3 text-sm"><span>{index + 1}. {product.productName}</span><strong>{product.interactions}</strong></div>)}</div></article>)}{data.length === 0 && <p className="text-slate-500">No hay interacciones en este rango.</p>}</div>}
+  </div>;
 }

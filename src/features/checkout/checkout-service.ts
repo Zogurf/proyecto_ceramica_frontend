@@ -12,6 +12,7 @@ export interface CheckoutCustomerInfo {
   customerEmail: string;
   shippingAddress: string;
   shippingReference?: string;
+  customerPhone: string;
 }
 
 export interface OrderItemResponse {
@@ -35,6 +36,7 @@ export interface OrderResponse {
   customerEmail: string;
   shippingAddress: string;
   shippingReference?: string;
+  customerPhone: string;
   items: OrderItemResponse[];
 }
 
@@ -63,4 +65,10 @@ export function getMyOrders() {
 
 export function getMyOrder(orderId: number) {
   return apiRequest<OrderResponse>(`/api/checkout/orders/${orderId}`);
+}
+
+export function retryOrderPayment(orderId: number) {
+  return apiRequest<CheckoutResponse>(`/api/checkout/orders/${orderId}/payment-session`, {
+    method: "POST",
+  });
 }

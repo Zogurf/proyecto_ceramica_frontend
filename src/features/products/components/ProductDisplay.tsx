@@ -10,6 +10,7 @@ import { getProductById } from "@/features/products/services/product-service";
 import { apiRequest } from "@/lib/api-client";
 import { getProductImageSrc } from "@/lib/images";
 import type { ProductDetail } from "@/types/product";
+import { addFavorite, getFavorites, removeFavorite } from "@/features/products/services/favorite-service";
 
 interface ProductDisplayProps {
   productId: number;
@@ -22,6 +23,7 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
   const [error, setError] = useState<string | null>(null);
   const [cantidad, setCantidad] = useState(1);
   const [selectedSizeId, setSelectedSizeId] = useState<number | null>(null);
+  const [favorite, setFavorite] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -64,6 +66,11 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
     return () => {
       ignore = true;
     };
+  }, [productId]);
+
+  useEffect(() => {
+    if (!localStorage.getItem("token")) return;
+    getFavorites().then(items => setFavorite(items.some(item => item.productId === productId))).catch(() => undefined);
   }, [productId]);
 
   const isChangingProduct = product !== null && product.id !== productId;
@@ -123,7 +130,16 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
       sizeDimension: selectedSize.dimension,
       quantity: cantidad,
     });
+    apiRequest<void>("/api/purchase-intentions", { method: "POST", body: { productId: product.id, interactionType: "CART" } }).catch(() => undefined);
     toast.success("Producto agregado al carrito");
+  };
+
+  const toggleFavorite = async () => {
+    if (!localStorage.getItem("token")) { toast.error("Inicia sesión para guardar favoritos"); return; }
+    try {
+      if (favorite) await removeFavorite(product.id); else await addFavorite(product.id);
+      setFavorite(!favorite); toast.success(favorite ? "Eliminado de favoritos" : "Guardado en favoritos");
+    } catch (e) { toast.error(e instanceof Error ? e.message : "No se pudo actualizar favoritos"); }
   };
 
   return (
@@ -255,6 +271,9 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
                   className="button-primary inline-flex w-full cursor-pointer items-center justify-center rounded-full bg-[#e3b792] px-6 py-4 text-sm font-semibold text-black transition hover:bg-[#d9a77d] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {product.stock === 0 ? "Agotado" : "Agregar al carrito"}
+                </button>
+                <button type="button" onClick={toggleFavorite} className="w-full rounded-full border border-[--accent] px-6 py-3 text-sm font-semibold text-[--foreground]">
+                  {favorite ? "♥ Guardado en favoritos" : "♡ Agregar a favoritos"}
                 </button>
               </div>
             </aside>

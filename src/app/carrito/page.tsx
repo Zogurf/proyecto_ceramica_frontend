@@ -25,6 +25,7 @@ export default function CartPage() {
   const [customerEmail, setCustomerEmail] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
   const [shippingReference, setShippingReference] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
 
   useEffect(() => {
     setCustomerName(user?.name ?? "");
@@ -37,8 +38,13 @@ export default function CartPage() {
       return;
     }
 
-    if (!customerName.trim() || !customerEmail.trim() || !shippingAddress.trim()) {
-      toast.error("Completa nombre, correo y direccion de entrega");
+    if (!customerName.trim() || !customerEmail.trim() || !shippingAddress.trim() || !customerPhone.trim()) {
+      toast.error("Completa nombre, correo, celular y direccion de entrega");
+      return;
+    }
+
+    if (!/^[0-9+()\s-]{7,20}$/.test(customerPhone.trim())) {
+      toast.error("Ingresa un numero de celular valido");
       return;
     }
 
@@ -49,6 +55,7 @@ export default function CartPage() {
         customerEmail: customerEmail.trim(),
         shippingAddress: shippingAddress.trim(),
         shippingReference: shippingReference.trim(),
+        customerPhone: customerPhone.trim(),
       });
       window.location.href = response.checkoutUrl;
     } catch (error: unknown) {
@@ -171,6 +178,18 @@ export default function CartPage() {
                     value={customerEmail}
                     onChange={(event) => setCustomerEmail(event.target.value)}
                     autoComplete="email"
+                    className="rounded-2xl border border-[--border-soft] bg-[#fffaf7] px-4 py-3 font-normal outline-none focus:border-[--accent]"
+                    required
+                  />
+                </label>
+                <label className="grid gap-1 text-sm font-semibold text-[--foreground]">
+                  Celular
+                  <input
+                    type="tel"
+                    value={customerPhone}
+                    onChange={(event) => setCustomerPhone(event.target.value)}
+                    autoComplete="tel"
+                    placeholder="987 654 321"
                     className="rounded-2xl border border-[--border-soft] bg-[#fffaf7] px-4 py-3 font-normal outline-none focus:border-[--accent]"
                     required
                   />

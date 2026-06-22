@@ -60,6 +60,7 @@ export default function AdminOrdersPage() {
                 <h2 className="text-lg font-bold text-slate-900">Pedido #{order.id}</h2>
                 <p className="text-sm text-slate-500">{order.customerName}</p>
                 <p className="text-sm text-slate-500">{order.customerEmail}</p>
+                <p className="text-sm text-slate-500">Celular: {order.customerPhone || "No registrado"}</p>
                 <p className="mt-2 text-sm text-slate-600">{order.shippingAddress}</p>
                 {order.shippingReference && (
                   <p className="text-xs text-slate-400">{order.shippingReference}</p>

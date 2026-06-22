@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import FooterPublic from "@/components/shared/footer-public";
-import { getMyOrder, type OrderResponse } from "@/features/checkout/checkout-service";
+import { getMyOrder, retryOrderPayment, type OrderResponse } from "@/features/checkout/checkout-service";
 import { getProductImageSrc } from "@/lib/images";
 
 function fulfillmentLabel(status: string) {
@@ -19,6 +20,19 @@ export default function MyOrderDetailPage() {
   const [order, setOrder] = useState<OrderResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [paying, setPaying] = useState(false);
+
+  const handlePay = async () => {
+    if (!order) return;
+    try {
+      setPaying(true);
+      const session = await retryOrderPayment(order.id);
+      window.location.href = session.checkoutUrl;
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "No se pudo reanudar el pago");
+      setPaying(false);
+    }
+  };
 
   useEffect(() => {
     const loadOrder = async () => {
@@ -110,6 +124,7 @@ export default function MyOrderDetailPage() {
               <div className="mt-5 border-y border-[--border-soft] py-5 text-sm text-[--muted]">
                 <p className="font-semibold text-[--foreground]">Entrega</p>
                 <p className="mt-2">{order.shippingAddress}</p>
+                <p className="mt-1">Celular: {order.customerPhone || "No registrado"}</p>
                 {order.shippingReference && <p className="mt-1 text-xs">{order.shippingReference}</p>}
               </div>
 
@@ -117,6 +132,16 @@ export default function MyOrderDetailPage() {
                 <span>Total</span>
                 <span>S/{order.total.toFixed(2)}</span>
               </div>
+              {order.status === "PENDING" && (
+                <button
+                  type="button"
+                  onClick={handlePay}
+                  disabled={paying}
+                  className="button-primary mt-5 w-full rounded-full px-5 py-3 text-sm font-semibold disabled:opacity-60"
+                >
+                  {paying ? "Abriendo pago..." : "Completar pago"}
+                </button>
+              )}
             </aside>
           </div>
         )}

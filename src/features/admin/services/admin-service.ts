@@ -64,6 +64,7 @@ export interface AdminOrderResponse {
   customerEmail: string;
   shippingAddress: string;
   shippingReference?: string;
+  customerPhone: string;
   items: AdminOrderItemResponse[];
 }
 
@@ -73,11 +74,26 @@ export interface PurchaseIntentResponse {
   productName: string;
   customerName: string;
   email: string;
+  categoryName: string;
+  interactionType: string;
   viewedAt: string;
 }
 
+export interface MetricPoint { label: string; value: number }
+export interface DashboardResponse {
+  totalRevenue: number; userCount: number; inventoryUnits: number; pendingOrders: number;
+  lowStockProducts: number; revenueToday: MetricPoint[]; revenueWeekly: MetricPoint[];
+  revenueMonthly: MetricPoint[]; inventoryByCategory: MetricPoint[]; interactionsByCategory: MetricPoint[];
+  lowStock: { id: number; name: string; stock: number; categoryName: string }[];
+}
+
+export interface CategoryIntentAnalyticsResponse {
+  categoryId: number; categoryName: string; interactions: number; uniqueCustomers: number;
+  topProducts: { productId: number; productName: string; interactions: number }[];
+}
+
 export interface CampaignRequest {
-  productId: number;
+  categoryId: number;
   offerText: string;
   startDate?: string;
   endDate?: string;
@@ -89,9 +105,12 @@ export interface CampaignResponse {
   recipients: number;
   subject: string;
   htmlPreview: string;
+  categoryName: string;
+  products: { id: number; name: string; price: number; imageUrl: string }[];
 }
 
 export const adminService = {
+  getDashboard: () => apiRequest<DashboardResponse>("/api/admin/dashboard"),
   getUsers: () => apiRequest<AdminUserResponse[]>("/api/admin/users"),
 
   getProducts: () => apiRequest<AdminProductResponse[]>("/api/admin/products"),
@@ -147,6 +166,16 @@ export const adminService = {
     const query = params.toString();
     return apiRequest<PurchaseIntentResponse[]>(
       `/api/admin/purchase-intentions${query ? `?${query}` : ""}`
+    );
+  },
+
+  getCategoryIntentions: (startDate?: string, endDate?: string) => {
+    const params = new URLSearchParams();
+    if (startDate) params.set("startDate", startDate);
+    if (endDate) params.set("endDate", endDate);
+    const query = params.toString();
+    return apiRequest<CategoryIntentAnalyticsResponse[]>(
+      `/api/admin/purchase-intentions/categories${query ? `?${query}` : ""}`
     );
   },
 
