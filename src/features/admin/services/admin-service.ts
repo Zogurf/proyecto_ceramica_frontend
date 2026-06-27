@@ -1,4 +1,4 @@
-import { apiRequest } from "@/lib/api-client";
+import { API_URL, apiRequest } from "@/lib/api-client";
 
 export interface AdminUserResponse {
   id: number;
@@ -109,7 +109,39 @@ export interface CampaignResponse {
   products: { id: number; name: string; price: number; imageUrl: string }[];
 }
 
+export interface UploadImageResponse {
+  imageUrl: string;
+  key: string;
+}
+
+async function uploadImage(file: File, folder: "productos" | "categorias" = "productos") {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("folder", folder);
+
+  const headers = new Headers();
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("token");
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  const response = await fetch(`${API_URL}/api/admin/uploads/images`, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.error || data?.message || `Error ${response.status}`);
+  }
+
+  return response.json() as Promise<UploadImageResponse>;
+}
+
 export const adminService = {
+  uploadImage,
+
   getDashboard: () => apiRequest<DashboardResponse>("/api/admin/dashboard"),
   getUsers: () => apiRequest<AdminUserResponse[]>("/api/admin/users"),
 

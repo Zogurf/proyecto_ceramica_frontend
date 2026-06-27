@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { getProductImageSrc } from "@/lib/images";
+import { getProductImageSrc, isRemoteImageSrc } from "@/lib/images";
 
 type Props = {
   producto: {
@@ -21,6 +21,7 @@ export default function ProductCard({
   producto,
 }: Props) {
   const router = useRouter();
+  const imageSrc = getProductImageSrc(producto.imageUrl);
 
   const handleComprar = () => {
     router.push(`/producto/${producto.id}`);
@@ -40,11 +41,12 @@ export default function ProductCard({
         </span>
 
         <Image
-          src={getProductImageSrc(producto.imageUrl)}
+          src={imageSrc}
           alt={producto.name}
           width={1200}
           height={1000}
           loading="eager"
+          unoptimized={isRemoteImageSrc(imageSrc)}
           className="h-72 w-full object-cover transition duration-500 group-hover:scale-[1.03]"
         />
       </div>

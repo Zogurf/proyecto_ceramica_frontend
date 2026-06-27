@@ -8,7 +8,7 @@ import FooterPublic from "@/components/shared/footer-public";
 import { useCart } from "@/features/cart/cart-context";
 import { getProductById } from "@/features/products/services/product-service";
 import { apiRequest } from "@/lib/api-client";
-import { getProductImageSrc } from "@/lib/images";
+import { getProductImageSrc, isRemoteImageSrc } from "@/lib/images";
 import type { ProductDetail } from "@/types/product";
 import { addFavorite, getFavorites, removeFavorite } from "@/features/products/services/favorite-service";
 
@@ -114,6 +114,7 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
   const selectedSize =
     product.sizes.find((size) => size.id === selectedSizeId) ?? product.sizes[0];
   const formattedPrice = `S/${Number(product.price).toFixed(2)}`;
+  const productImageSrc = getProductImageSrc(product.imageUrl);
   const handleAddToCart = () => {
     if (!selectedSize) {
       toast.error("Selecciona un tamaño");
@@ -124,7 +125,7 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
       productId: product.id,
       name: product.name,
       price: Number(product.price),
-      imageUrl: getProductImageSrc(product.imageUrl),
+      imageUrl: productImageSrc,
       sizeId: selectedSize.id,
       sizeName: selectedSize.name,
       sizeDimension: selectedSize.dimension,
@@ -150,12 +151,13 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
             <div className="image-card overflow-hidden rounded-[1.6rem]">
               <div className="relative aspect-square w-full">
                 <Image
-                  src={getProductImageSrc(product.imageUrl)}
+                  src={productImageSrc}
                   alt={product.name}
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 55vw"
                   priority
+                  unoptimized={isRemoteImageSrc(productImageSrc)}
                 />
               </div>
             </div>
@@ -307,31 +309,38 @@ export default function ProductDisplay({ productId }: ProductDisplayProps) {
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {product.relatedProducts.map((related) => (
-                <Link
-                  key={related.id}
-                  href={`/producto/${related.id}`}
-                  className="group rounded-[1.5rem] border border-[--border-soft] bg-[--surface] p-3 shadow-[0_18px_45px_rgba(77,50,36,0.08)] transition hover:-translate-y-1 hover:shadow-[0_24px_55px_rgba(77,50,36,0.14)]"
-                >
-                  <div className="image-card overflow-hidden rounded-[1.2rem]">
-                    <div className="relative aspect-square w-full">
-                      <Image
-                        src={getProductImageSrc(related.imageUrl)}
-                        alt={related.name}
-                        fill
-                        className="object-cover transition duration-500 group-hover:scale-[1.03]"
-                        sizes="(max-width: 768px) 50vw, 25vw"
-                      />
-                    </div>
-                  </div>
-                  <div className="px-2 pt-4">
-                    <h3 className="font-display text-2xl text-[--foreground]">
-                      {related.name}
-                    </h3>
-                    <p className="mt-1 text-sm font-semibold text-[--accent]">
-                      S/{Number(related.price).toFixed(2)}
-                    </p>
-                  </div>
-                </Link>
+                (() => {
+                  const relatedImageSrc = getProductImageSrc(related.imageUrl);
+
+                  return (
+                    <Link
+                      key={related.id}
+                      href={`/producto/${related.id}`}
+                      className="group rounded-[1.5rem] border border-[--border-soft] bg-[--surface] p-3 shadow-[0_18px_45px_rgba(77,50,36,0.08)] transition hover:-translate-y-1 hover:shadow-[0_24px_55px_rgba(77,50,36,0.14)]"
+                    >
+                      <div className="image-card overflow-hidden rounded-[1.2rem]">
+                        <div className="relative aspect-square w-full">
+                          <Image
+                            src={relatedImageSrc}
+                            alt={related.name}
+                            fill
+                            className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                            sizes="(max-width: 768px) 50vw, 25vw"
+                            unoptimized={isRemoteImageSrc(relatedImageSrc)}
+                          />
+                        </div>
+                      </div>
+                      <div className="px-2 pt-4">
+                        <h3 className="font-display text-2xl text-[--foreground]">
+                          {related.name}
+                        </h3>
+                        <p className="mt-1 text-sm font-semibold text-[--accent]">
+                          S/{Number(related.price).toFixed(2)}
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })()
               ))}
             </div>
           </section>

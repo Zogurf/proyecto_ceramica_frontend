@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import {
+  adminService,
   type AdminCategoryRequest,
   type AdminCategoryResponse,
 } from "@/features/admin/services/admin-service";
@@ -96,21 +97,7 @@ export default function CategoryModal({
       let imageUrl = formData.imageUrl;
 
       if (selectedFile) {
-        const uploadData = new FormData();
-
-        uploadData.append("file", selectedFile);
-
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: uploadData,
-        });
-
-        if (!response.ok) {
-          throw new Error("No se pudo subir la imagen");
-        }
-
-        const result = await response.json();
-
+        const result = await adminService.uploadImage(selectedFile, "categorias");
         imageUrl = result.imageUrl;
       }
 

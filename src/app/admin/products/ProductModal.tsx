@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
+  adminService,
   type AdminCategoryResponse,
   type AdminProductRequest,
   type AdminProductResponse,
@@ -81,17 +82,7 @@ export default function ProductModal({
       let imageUrl = formData.imageUrl;
 
       if (selectedFile) {
-        const uploadData = new FormData();
-
-        uploadData.append("file", selectedFile);
-
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: uploadData,
-        });
-
-        const result = await response.json();
-
+        const result = await adminService.uploadImage(selectedFile, "productos");
         imageUrl = result.imageUrl;
       }
 
@@ -116,6 +107,16 @@ export default function ProductModal({
     const file = event.target.files?.[0];
 
     if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Solo se permiten imagenes");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("La imagen no puede superar los 5 MB");
+      return;
+    }
 
     setSelectedFile(file);
 
